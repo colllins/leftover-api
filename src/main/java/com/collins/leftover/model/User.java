@@ -16,6 +16,8 @@ public class User {
     private Long id;
 
     private String name;
+
+    @Column(unique = true)
     private String email;
 
     @Enumerated(EnumType.STRING)
@@ -24,7 +26,7 @@ public class User {
     private LocalDate createdAt;
     private LocalDate updatedAt;
 
-    protected User(){}
+    public User(){}
 
     public User(String name, String email, PayFrequency payFrequency, LocalDate onBoardingDate) {
         this.name = name;
