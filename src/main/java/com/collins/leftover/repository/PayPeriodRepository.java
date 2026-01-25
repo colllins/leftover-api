@@ -9,6 +9,7 @@ import java.util.Optional;
 
 public interface PayPeriodRepository extends JpaRepository<PayPeriod, Long> {
     List<PayPeriod> findAllByUser_IdOrderByStartDateDesc(Long userId);
+    List<PayPeriod> findAllByUser_Id(Long userId);
     Optional<PayPeriod> findByIdAndUser_Id(Long id, Long userId);
     Optional<PayPeriod> findFirstByUser_IdOrderByStartDateDesc(Long userId);
     Optional<PayPeriod> findFirstByUser_IdAndStartDateLessThanEqualOrderByStartDateDesc(Long userId, LocalDate date);
