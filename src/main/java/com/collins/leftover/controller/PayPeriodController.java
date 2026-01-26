@@ -4,6 +4,7 @@ import com.collins.leftover.dto.dashboard.DashboardSummaryResponseDto;
 import com.collins.leftover.dto.payperiod.CreatePayPeriodRequestDto;
 import com.collins.leftover.dto.payperiod.PayPeriodResponseDto;
 import com.collins.leftover.service.PayPeriodService;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -21,7 +22,7 @@ public class PayPeriodController {
     }
 
     @PostMapping("/api/users/{userId}/pay-periods")
-    public PayPeriodResponseDto createPayPeriod(@PathVariable @Positive Long userId, @RequestBody CreatePayPeriodRequestDto createPayPeriodRequestDto){
+    public PayPeriodResponseDto createPayPeriod(@PathVariable @Positive Long userId, @Valid @RequestBody CreatePayPeriodRequestDto createPayPeriodRequestDto){
         return payPeriodService.createPayPeriod(userId, createPayPeriodRequestDto);
     }
 
@@ -36,7 +37,10 @@ public class PayPeriodController {
     }
 
     @GetMapping("/api/users/{userId}/pay-periods/{payPeriodId}/summary")
-    public DashboardSummaryResponseDto getPayPeriodSummary(@PathVariable @Positive Long userId, @PathVariable @Positive Long payPeriodId){
-        return payPeriodService.getPayPeriodSummary(userId, payPeriodId);
+    public DashboardSummaryResponseDto getPayPeriodSummary(
+            @PathVariable @Positive Long userId,
+            @PathVariable @Positive Long payPeriodId,
+            @RequestParam(name="limit", defaultValue = "5") @Positive int limit){
+        return payPeriodService.getPayPeriodSummary(userId, payPeriodId, limit);
     }
 }

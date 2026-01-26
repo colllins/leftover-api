@@ -9,10 +9,6 @@ import java.time.LocalDate;
 public class CreateTransactionRequestDto {
 
     @NotNull
-    @Positive
-    private Long payPeriodId;
-
-    @NotNull
     private TransactionType type;
 
     @NotNull
@@ -34,21 +30,12 @@ public class CreateTransactionRequestDto {
 
     public CreateTransactionRequestDto() {}
 
-    public CreateTransactionRequestDto(Long payPeriodId, TransactionType type, BigDecimal amount, String category, LocalDate date, String description) {
-        this.payPeriodId = payPeriodId;
+    public CreateTransactionRequestDto(TransactionType type, BigDecimal amount, String category, LocalDate date, String description) {
         this.type = type;
         this.amount = amount;
         this.category = category;
         this.date = date;
         this.description = description;
-    }
-
-    public Long getPayPeriodId() {
-        return payPeriodId;
-    }
-
-    public void setPayPeriodId(Long payPeriodId) {
-        this.payPeriodId = payPeriodId;
     }
 
     public void setType(TransactionType type) {

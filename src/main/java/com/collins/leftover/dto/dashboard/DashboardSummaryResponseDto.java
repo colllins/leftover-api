@@ -1,7 +1,10 @@
 package com.collins.leftover.dto.dashboard;
 
+import com.collins.leftover.dto.transaction.TransactionResponseDto;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.List;
 
 public class DashboardSummaryResponseDto {
     private Long currentPayPeriodId;
@@ -12,11 +15,11 @@ public class DashboardSummaryResponseDto {
     private BigDecimal totalExpenses;
     private BigDecimal leftOver;
 //    private List<RecurringExpenseResponseDto> recurringExpenses;
-//    private List<TransactionResponseDto> recentTransactions;
+    private List<TransactionResponseDto> recentTransactions;
 
     public DashboardSummaryResponseDto() {}
 
-    public DashboardSummaryResponseDto(Long currentPayPeriodId, LocalDate startDate, LocalDate endDate, BigDecimal plannedIncome, BigDecimal totalIncome, BigDecimal totalExpenses, BigDecimal leftOver) {
+    public DashboardSummaryResponseDto(Long currentPayPeriodId, LocalDate startDate, LocalDate endDate, BigDecimal plannedIncome, BigDecimal totalIncome, BigDecimal totalExpenses, BigDecimal leftOver, List<TransactionResponseDto> recentTransactions) {
         this.currentPayPeriodId = currentPayPeriodId;
         this.startDate = startDate;
         this.endDate = endDate;
@@ -25,7 +28,7 @@ public class DashboardSummaryResponseDto {
         this.totalExpenses = totalExpenses;
         this.leftOver = leftOver;
 //        this.recurringExpenses = recurringExpenses;
-//        this.recentTransactions = recentTransactions;
+        this.recentTransactions = recentTransactions;
     }
 
     public Long getCurrentPayPeriodId() {
@@ -60,7 +63,7 @@ public class DashboardSummaryResponseDto {
 //        return recurringExpenses;
 //    }
 //
-//    public List<TransactionResponseDto> getRecentTransactions() {
-//        return recentTransactions;
-//    }
+    public List<TransactionResponseDto> getRecentTransactions() {
+        return recentTransactions;
+    }
 }

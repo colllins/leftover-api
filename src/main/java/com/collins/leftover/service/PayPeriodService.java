@@ -25,11 +25,13 @@ public class PayPeriodService {
     private final PayPeriodRepository payPeriodRepository;
     private final UserRepository userRepository;
     private final TransactionRepository transactionRepository;
+    private final TransactionService transactionService;
 
-    public PayPeriodService(PayPeriodRepository payPeriodRepository, UserRepository userRepository, TransactionRepository transactionRepository) {
+    public PayPeriodService(PayPeriodRepository payPeriodRepository, UserRepository userRepository, TransactionRepository transactionRepository, TransactionService transactionService) {
         this.payPeriodRepository = payPeriodRepository;
         this.userRepository = userRepository;
         this.transactionRepository = transactionRepository;
+        this.transactionService = transactionService;
     }
 
     @Transactional
@@ -74,7 +76,7 @@ public class PayPeriodService {
     }
 
     @Transactional
-    public DashboardSummaryResponseDto getPayPeriodSummary(Long userId, Long payPeriodId){
+    public DashboardSummaryResponseDto getPayPeriodSummary(Long userId, Long payPeriodId, int limit){
         BigDecimal income = BigDecimal.ZERO;
         BigDecimal expense = BigDecimal.ZERO;
         BigDecimal leftOver;
@@ -96,7 +98,7 @@ public class PayPeriodService {
 
             PayPeriodResponseDto payPeriod = getPayPeriodById(userId, payPeriodId);
 
-       return new DashboardSummaryResponseDto(payPeriodId, payPeriod.getStartDate(), payPeriod.getEndDate(),payPeriod.getPlannedIncome(), income, expense, leftOver);
+       return new DashboardSummaryResponseDto(payPeriodId, payPeriod.getStartDate(), payPeriod.getEndDate(),payPeriod.getPlannedIncome(), income, expense, leftOver, transactionService.getRecentTransactions(userId, limit));
     }
 
 }

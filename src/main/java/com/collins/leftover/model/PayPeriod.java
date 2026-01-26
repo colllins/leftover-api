@@ -25,7 +25,7 @@ public class PayPeriod {
     private LocalDate createdAt;
     private LocalDate updatedAt;
 
-    protected PayPeriod(){}
+    public PayPeriod(){}
 
     public PayPeriod(User user, LocalDate startDate, LocalDate endDate, BigDecimal plannedIncome, boolean active) {
         this.user = user;
