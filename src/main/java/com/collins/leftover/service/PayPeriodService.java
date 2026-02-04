@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service
+@Transactional
 public class PayPeriodService {
 
     private final PayPeriodRepository payPeriodRepository;
@@ -34,22 +35,20 @@ public class PayPeriodService {
         this.transactionService = transactionService;
     }
 
-    @Transactional
     public PayPeriodResponseDto createPayPeriod(Long userId, CreatePayPeriodRequestDto createPayPeriodRequestDto){
         //check if user exists
         User user = userRepository.findById(userId).orElseThrow(()-> new ResponseStatusException(HttpStatus.NOT_FOUND, "User with that id Not Found!"));
 
         //create the pay period on this specific user
-        PayPeriod payPeriod = new PayPeriod(user, createPayPeriodRequestDto.getStartDate(), createPayPeriodRequestDto.getEndDate(), createPayPeriodRequestDto.getPlannedIncome(), true);
-        payPeriodRepository.findAll().forEach(period -> {
+        payPeriodRepository.findAllByUser_Id(userId).forEach(period -> {
             period.setActive(false);
         });
+        PayPeriod payPeriod = new PayPeriod(user, createPayPeriodRequestDto.getStartDate(), createPayPeriodRequestDto.getEndDate(), createPayPeriodRequestDto.getPlannedIncome(), true);
         payPeriodRepository.save(payPeriod);
 
         return new PayPeriodResponseDto(payPeriod.getId(), payPeriod.getStartDate(), payPeriod.getEndDate(), payPeriod.getPlannedIncome(), payPeriod.isActive());
     }
 
-    @Transactional
     public List<PayPeriodResponseDto> getPayPeriodsForUser(Long userId){
         List<PayPeriodResponseDto> payPeriods = new ArrayList<>();
 
@@ -65,7 +64,6 @@ public class PayPeriodService {
         return payPeriods;
     }
 
-    @Transactional
     public  PayPeriodResponseDto getPayPeriodById(Long userId, Long payPeriodId){
         //check if user exists
         if(!userRepository.existsById(userId)) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User with that id Not Found!");
@@ -75,7 +73,6 @@ public class PayPeriodService {
         return new PayPeriodResponseDto(payPeriod.getId(), payPeriod.getStartDate(), payPeriod.getEndDate(), payPeriod.getPlannedIncome(), payPeriod.isActive());
     }
 
-    @Transactional
     public DashboardSummaryResponseDto getPayPeriodSummary(Long userId, Long payPeriodId, int limit){
         BigDecimal income = BigDecimal.ZERO;
         BigDecimal expense = BigDecimal.ZERO;
@@ -94,9 +91,12 @@ public class PayPeriodService {
         }else{
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No transactions for this pay period");
         }
-            leftOver = income.subtract(expense);
 
-            PayPeriodResponseDto payPeriod = getPayPeriodById(userId, payPeriodId);
+        PayPeriodResponseDto payPeriod = getPayPeriodById(userId, payPeriodId);
+
+        income = income.add(payPeriod.getPlannedIncome());
+        leftOver = income.subtract(expense);
+
 
        return new DashboardSummaryResponseDto(payPeriodId, payPeriod.getStartDate(), payPeriod.getEndDate(),payPeriod.getPlannedIncome(), income, expense, leftOver, transactionService.getRecentTransactions(userId, limit));
     }

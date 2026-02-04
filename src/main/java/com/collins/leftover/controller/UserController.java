@@ -24,7 +24,7 @@ public class UserController {
     }
 
     @GetMapping("/api/users/{id}")
-    public AuthResponseDto retrieveUser(@PathVariable @Positive Long id){
+    public AuthResponseDto retrieveUser(@PathVariable("id") @Positive Long id){
         return userService.getUserById(id);
     }
 }

@@ -4,6 +4,7 @@ import com.collins.leftover.dto.user.AuthResponseDto;
 import com.collins.leftover.dto.user.RegisterRequestDto;
 import com.collins.leftover.model.User;
 import com.collins.leftover.repository.UserRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -12,6 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service
+@Transactional
 public class UserService {
     private final UserRepository userRepository;
 

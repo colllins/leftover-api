@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service
+@Transactional
 public class TransactionService {
     private final TransactionRepository transactionRepository;
     private final UserRepository userRepository;
@@ -29,7 +30,6 @@ public class TransactionService {
         this.payPeriodRepository = payPeriodRepository;
     }
 
-    @Transactional
     public TransactionResponseDto createTransaction(Long userId, CreateTransactionRequestDto dto){
         //check if user exists
         User user = userRepository.findById(userId).orElseThrow(()-> new ResponseStatusException(HttpStatus.NOT_FOUND, "User with that id Not Found!"));
@@ -52,7 +52,6 @@ public class TransactionService {
         return new TransactionResponseDto(transaction.getId(), transaction.getType(), transaction.getAmount(), transaction.getCategory(), transaction.getDate(), transaction.getDescription());
     }
 
-    @Transactional
     public List<TransactionResponseDto> getTransactionsForPayPeriod(Long userId, Long payPeriodId){
 
         List<TransactionResponseDto> transactions = new ArrayList<>();
@@ -83,7 +82,6 @@ public class TransactionService {
       return transactions;
     }
 
-    @Transactional
     public TransactionResponseDto getTransactionById(Long userId, Long transactionId){
 
         Transaction transaction = transactionRepository.findByIdAndUser_Id(transactionId, userId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "No Transaction found with that id"));
@@ -91,7 +89,6 @@ public class TransactionService {
         return new TransactionResponseDto(transaction.getId(), transaction.getType(), transaction.getAmount(), transaction.getCategory(), transaction.getDate(), transaction.getDescription());
     }
 
-    @Transactional
     public TransactionResponseDto updateTransaction(Long userId, Long transactionId, UpdateTransactionDto dto){
 
         User user = userRepository.findById(userId).orElseThrow(()-> new ResponseStatusException(HttpStatus.NOT_FOUND, "User with that id Not Found!"));
@@ -113,7 +110,6 @@ public class TransactionService {
         return new TransactionResponseDto(transaction.getId(), transaction.getType(), transaction.getAmount(), transaction.getCategory(), transaction.getDate(), transaction.getDescription());
     }
 
-    @Transactional
     public void deleteTransaction(Long userId, Long transactionId){
 
         Transaction transaction = transactionRepository.findByIdAndUser_Id(transactionId, userId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "No Transaction found with that id"));
@@ -121,7 +117,6 @@ public class TransactionService {
         transactionRepository.delete(transaction);
     }
 
-    @Transactional
     public List<TransactionResponseDto> getRecentTransactions(Long userId, int limit){
 
         List<TransactionResponseDto> transactions = new ArrayList<>();
