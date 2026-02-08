@@ -31,16 +31,16 @@ public class RecurringExpenseController {
 
     @GetMapping("/api/users/{userId}/recurring-expenses/{expenseId}")
     public RecurringExpenseResponseDto getRecurringExpenseById(@PathVariable("userId") @Positive Long userId, @PathVariable("expenseId") @Positive Long recurringExpenseId){
-        return recurringExpenseService.getRecurringExpenseById(recurringExpenseId, userId);
+        return recurringExpenseService.getRecurringExpenseById(userId, recurringExpenseId);
     }
 
     @PatchMapping("/api/users/{userId}/recurring-expenses/{expenseId}/deactivate")
     public void deactivateRecurringExpense(@PathVariable("userId") @Positive Long userId, @PathVariable("expenseId") @Positive Long expenseId){
-        recurringExpenseService.deactivateRecurringExpense(expenseId, userId);
+        recurringExpenseService.deactivateRecurringExpense(userId, expenseId);
     }
 
-    @DeleteMapping("/api/users/{user}/recurring-expenses/{expenseId}")
+    @DeleteMapping("/api/users/{userId}/recurring-expenses/{expenseId}")
     public void deleteRecurringExpense(@PathVariable("userId") @Positive Long userId, @PathVariable("expenseId") @Positive Long expenseId){
-        recurringExpenseService.deleteRecurringExpense(expenseId, userId);
+        recurringExpenseService.deleteRecurringExpense(userId, expenseId);
     }
 }
