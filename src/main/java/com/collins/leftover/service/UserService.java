@@ -5,7 +5,13 @@ import com.collins.leftover.dto.user.RegisterRequestDto;
 import com.collins.leftover.model.User;
 import com.collins.leftover.repository.UserRepository;
 import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -14,12 +20,9 @@ import java.util.List;
 
 @Service
 @Transactional
-public class UserService {
+@RequiredArgsConstructor
+public class UserService implements UserDetailsService {
     private final UserRepository userRepository;
-
-    public UserService(UserRepository userRepository) {
-        this.userRepository = userRepository;
-    }
 
     public AuthResponseDto registerUser(RegisterRequestDto requestDto){
 
@@ -28,7 +31,7 @@ public class UserService {
         if(!userRepository.existsByEmail(email)){
 
             //creating new user using requestDto which has validation annotation and its sets udpatedAt and createdAt and saves user in the db
-             User user = new User(requestDto.getName(), email,requestDto.getPayFrequency(), requestDto.getOnBoardingDate());
+             User user = new User(requestDto.getName(), email, requestDto.getPwd(), requestDto.getRole(), requestDto.getPayFrequency(), requestDto.getOnBoardingDate());
             userRepository.save(user);
 
             //using the newly created user to create a reponseDto for client viewing
@@ -67,4 +70,10 @@ public class UserService {
 
             return users;
     }
+
+    @Override
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        User user = userRepository.findByEmail(username).orElseThrow(()->new UsernameNotFoundException("user details not found for user"));
+        List<GrantedAuthority> authorities = List.of(new SimpleGrantedAuthority(user.getRole()));
+        return new org.springframework.security.core.userdetails.User(user.getEmail(), user.getPwd(), authorities);    }
 }

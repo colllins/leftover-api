@@ -2,9 +2,16 @@ package com.collins.leftover.dto.user;
 
 import com.collins.leftover.model.PayFrequency;
 import jakarta.validation.constraints.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.time.LocalDate;
 
+@NoArgsConstructor
+@AllArgsConstructor
+@Getter @Setter
 public class RegisterRequestDto {
 
     @NotBlank
@@ -16,53 +23,18 @@ public class RegisterRequestDto {
     @Size(max = 254)
     private String email;
 
+    @NotBlank
+    @Size(max = 60)
+    private  String pwd;
+
+    @NotBlank
+    private String role;
+
     @NotNull
     private PayFrequency payFrequency;
 
     @NotNull
     @PastOrPresent
     private LocalDate onBoardingDate;
-
-    public RegisterRequestDto(){}
-
-    public RegisterRequestDto(String name, String email, PayFrequency payFrequency, LocalDate onBoardingDate) {
-        this.name = name;
-        this.email = email;
-        this.payFrequency = payFrequency;
-        this.onBoardingDate = onBoardingDate;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public void setPayFrequency(PayFrequency payFrequency) {
-        this.payFrequency = payFrequency;
-    }
-
-    public void setOnBoardingDate(LocalDate onBoardingDate) {
-        this.onBoardingDate = onBoardingDate;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public PayFrequency getPayFrequency() {
-        return payFrequency;
-    }
-
-
-    public LocalDate getOnBoardingDate() {
-        return onBoardingDate;
-    }
 
 }

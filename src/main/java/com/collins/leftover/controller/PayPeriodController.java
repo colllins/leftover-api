@@ -6,6 +6,7 @@ import com.collins.leftover.dto.payperiod.PayPeriodResponseDto;
 import com.collins.leftover.service.PayPeriodService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
+import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -13,34 +14,55 @@ import java.util.List;
 
 @RestController
 @Validated
+@RequestMapping("/api/users/pay-periods")
+@RequiredArgsConstructor
 public class PayPeriodController {
 
     private final PayPeriodService payPeriodService;
 
-    public PayPeriodController(PayPeriodService payPeriodService) {
-        this.payPeriodService = payPeriodService;
-    }
+//    @PostMapping("/api/users/{userId}/pay-periods")
+//    public PayPeriodResponseDto createPayPeriod(@PathVariable("userId") @Positive Long userId, @Valid @RequestBody CreatePayPeriodRequestDto createPayPeriodRequestDto){
+//        return payPeriodService.createPayPeriod(userId, createPayPeriodRequestDto);
+//    }
+//
+//    @GetMapping("/api/users/{userId}/pay-periods")
+//    public List<PayPeriodResponseDto> getUserPayPeriods(@PathVariable("userId") @Positive Long userId){
+//        return  payPeriodService.getPayPeriodsForUser(userId);
+//    }
+//
+//    @GetMapping("/api/users/{userId}/pay-periods/{payPeriodId}")
+//    public PayPeriodResponseDto getPayPeriodById(@PathVariable("userId") @Positive Long userId, @PathVariable("payPeriodId") @Positive Long payPeriodId){
+//        return payPeriodService.getPayPeriodById(userId, payPeriodId);
+//    }
+//
+//    @GetMapping("/api/users/{userId}/pay-periods/{payPeriodId}/summary")
+//    public DashboardSummaryResponseDto getPayPeriodSummary(
+//            @PathVariable("userId") @Positive Long userId,
+//            @PathVariable("payPeriodId") @Positive Long payPeriodId,
+//            @RequestParam(name="limit", defaultValue = "5") @Positive int limit){
+//        return payPeriodService.getPayPeriodSummary(userId, payPeriodId, limit);
+//    }
 
-    @PostMapping("/api/users/{userId}/pay-periods")
-    public PayPeriodResponseDto createPayPeriod(@PathVariable("userId") @Positive Long userId, @Valid @RequestBody CreatePayPeriodRequestDto createPayPeriodRequestDto){
-        return payPeriodService.createPayPeriod(userId, createPayPeriodRequestDto);
-    }
+        @PostMapping
+        public PayPeriodResponseDto createPayPeriod(@PathVariable("userId") @Positive Long userId, @Valid @RequestBody CreatePayPeriodRequestDto createPayPeriodRequestDto){
+            return payPeriodService.createPayPeriod(userId, createPayPeriodRequestDto);
+        }
 
-    @GetMapping("/api/users/{userId}/pay-periods")
-    public List<PayPeriodResponseDto> getUserPayPeriods(@PathVariable("userId") @Positive Long userId){
-        return  payPeriodService.getPayPeriodsForUser(userId);
-    }
+        @GetMapping
+        public List<PayPeriodResponseDto> getUserPayPeriods(@PathVariable("userId") @Positive Long userId){
+            return  payPeriodService.getPayPeriodsForUser(userId);
+        }
 
-    @GetMapping("/api/users/{userId}/pay-periods/{payPeriodId}")
-    public PayPeriodResponseDto getPayPeriodById(@PathVariable("userId") @Positive Long userId, @PathVariable("payPeriodId") @Positive Long payPeriodId){
-        return payPeriodService.getPayPeriodById(userId, payPeriodId);
-    }
+        @GetMapping("/{payPeriodId}")
+        public PayPeriodResponseDto getPayPeriodById(@PathVariable("userId") @Positive Long userId, @PathVariable("payPeriodId") @Positive Long payPeriodId){
+            return payPeriodService.getPayPeriodById(userId, payPeriodId);
+        }
 
-    @GetMapping("/api/users/{userId}/pay-periods/{payPeriodId}/summary")
-    public DashboardSummaryResponseDto getPayPeriodSummary(
-            @PathVariable("userId") @Positive Long userId,
-            @PathVariable("payPeriodId") @Positive Long payPeriodId,
-            @RequestParam(name="limit", defaultValue = "5") @Positive int limit){
-        return payPeriodService.getPayPeriodSummary(userId, payPeriodId, limit);
-    }
+        @GetMapping("/{payPeriodId}/summary")
+        public DashboardSummaryResponseDto getPayPeriodSummary(
+                @PathVariable("userId") @Positive Long userId,
+                @PathVariable("payPeriodId") @Positive Long payPeriodId,
+                @RequestParam(name="limit", defaultValue = "5") @Positive int limit){
+            return payPeriodService.getPayPeriodSummary(userId, payPeriodId, limit);
+        }
 }

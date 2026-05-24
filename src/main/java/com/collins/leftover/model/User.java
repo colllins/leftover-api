@@ -20,6 +20,10 @@ public class User {
     @Column(unique = true)
     private String email;
 
+    private String pwd;
+    private String role;
+
+
     @Enumerated(EnumType.STRING)
     private PayFrequency payFrequency;
     private LocalDate onBoardingDate;
@@ -28,9 +32,11 @@ public class User {
 
     public User(){}
 
-    public User(String name, String email, PayFrequency payFrequency, LocalDate onBoardingDate) {
+    public User(String name, String email, String pwd, String role, PayFrequency payFrequency, LocalDate onBoardingDate) {
         this.name = name;
         this.email = email;
+        this.pwd = pwd;
+        this.role = role;
         this.payFrequency = payFrequency;
         this.onBoardingDate = onBoardingDate;
         this.createdAt = LocalDate.now();
@@ -55,6 +61,14 @@ public class User {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public String getRole(){
+        return role;
+    }
+
+    public String getPwd(){
+        return pwd;
     }
 
     public PayFrequency getPayFrequency() {
@@ -87,6 +101,8 @@ public class User {
                 "id=" + id +
                 ", name='" + name + '\'' +
                 ", email='" + email + '\'' +
+                ", pwd='" + pwd + '\'' +
+                ", role='" + role + '\'' +
                 ", payFrequency=" + payFrequency +
                 ", onBoardingDate=" + onBoardingDate +
                 ", createdAt=" + createdAt +

@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface PayPeriodRepository extends JpaRepository<PayPeriod, Long> {
+    List<PayPeriod> findAll();
     List<PayPeriod> findAllByUser_IdOrderByStartDateDesc(Long userId);
     List<PayPeriod> findAllByUser_Id(Long userId);
     Optional<PayPeriod> findByIdAndUser_Id(Long id, Long userId);

@@ -8,9 +8,11 @@ import com.collins.leftover.model.Transaction;
 import com.collins.leftover.model.TransactionType;
 import com.collins.leftover.model.User;
 import com.collins.leftover.repository.PayPeriodRepository;
+import com.collins.leftover.repository.PayPeriodSummaryRepository;
 import com.collins.leftover.repository.TransactionRepository;
 import com.collins.leftover.repository.UserRepository;
 import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -21,19 +23,14 @@ import java.util.List;
 
 @Service
 @Transactional
+@RequiredArgsConstructor
 public class PayPeriodService {
 
     private final PayPeriodRepository payPeriodRepository;
     private final UserRepository userRepository;
     private final TransactionRepository transactionRepository;
     private final TransactionService transactionService;
-
-    public PayPeriodService(PayPeriodRepository payPeriodRepository, UserRepository userRepository, TransactionRepository transactionRepository, TransactionService transactionService) {
-        this.payPeriodRepository = payPeriodRepository;
-        this.userRepository = userRepository;
-        this.transactionRepository = transactionRepository;
-        this.transactionService = transactionService;
-    }
+    private final PayPeriodSummaryRepository payPeriodSummaryRepository;
 
     public PayPeriodResponseDto createPayPeriod(Long userId, CreatePayPeriodRequestDto createPayPeriodRequestDto){
         //check if user exists
@@ -100,5 +97,28 @@ public class PayPeriodService {
 
        return new DashboardSummaryResponseDto(payPeriodId, payPeriod.getStartDate(), payPeriod.getEndDate(),payPeriod.getPlannedIncome(), income, expense, leftOver, transactionService.getRecentTransactions(userId, limit));
     }
+
+//    public PayPeriodSummary createSummary(PayPeriod payPeriod) {
+//
+//        BigDecimal income = payPeriod.getPlannedIncome();
+//
+//        BigDecimal expenses = transactionRepository
+//                .findAllByPayPeriodId(payPeriod.getId())
+//                .stream()
+//                .map(Transaction::getAmount)
+//                .reduce(BigDecimal.ZERO, BigDecimal::add);
+//
+//        BigDecimal leftOver = income.subtract(expenses);
+//
+//        PayPeriodSummary summary = new PayPeriodSummary();
+//        summary.setUser(payPeriod.getUser());
+//        summary.setPayPeriod(payPeriod);
+//        summary.setIncome(income);
+//        summary.setExpenses(expenses);
+//        summary.setLeftOver(leftOver);
+//        summary.setCreatedAt(LocalDateTime.now());
+//
+//        return payPeriodSummaryRepository.save(summary);
+//    }
 
 }

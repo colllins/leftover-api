@@ -9,6 +9,7 @@ import java.util.Optional;
 
 public interface TransactionRepository extends JpaRepository<Transaction, Long> {
     List<Transaction> findAllByUser_IdOrderByDateDesc(Long userId);
+    List<Transaction> findAllByPayPeriodId(Long payPeriodId);
     List<Transaction> findAllByUser_IdAndPayPeriod_IdOrderByDateDesc(Long userId, Long payPeriodId);
     List<Transaction> findAllByUser_IdAndDateBetweenOrderByDateAsc(Long userId, LocalDate from, LocalDate to);
     List<Transaction> findTop10ByUser_IdOrderByDateDesc(Long userId);

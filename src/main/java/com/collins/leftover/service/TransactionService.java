@@ -10,6 +10,7 @@ import com.collins.leftover.repository.PayPeriodRepository;
 import com.collins.leftover.repository.TransactionRepository;
 import com.collins.leftover.repository.UserRepository;
 import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -19,16 +20,11 @@ import java.util.List;
 
 @Service
 @Transactional
+@RequiredArgsConstructor
 public class TransactionService {
     private final TransactionRepository transactionRepository;
     private final UserRepository userRepository;
     private final PayPeriodRepository payPeriodRepository;
-
-    public TransactionService(TransactionRepository transactionRepository, UserRepository userRepository, PayPeriodRepository payPeriodRepository) {
-        this.transactionRepository = transactionRepository;
-        this.userRepository = userRepository;
-        this.payPeriodRepository = payPeriodRepository;
-    }
 
     public TransactionResponseDto createTransaction(Long userId, CreateTransactionRequestDto dto){
         //check if user exists

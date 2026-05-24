@@ -7,6 +7,7 @@ import com.collins.leftover.model.User;
 import com.collins.leftover.repository.RecurringExpenseRepository;
 import com.collins.leftover.repository.UserRepository;
 import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -16,15 +17,11 @@ import java.util.List;
 
 @Service
 @Transactional
+@RequiredArgsConstructor
 public class RecurringExpenseService {
 
     private final RecurringExpenseRepository recurringExpenseRepository;
     private final UserRepository userRepository;
-
-    public RecurringExpenseService(RecurringExpenseRepository recurringExpenseRepository, UserRepository userRepository) {
-        this.recurringExpenseRepository = recurringExpenseRepository;
-        this.userRepository = userRepository;
-    }
 
     public RecurringExpenseResponseDto createRecurringExpense(Long userId, CreateRecurringExpenseRequestDto dto){
         User user = userRepository.findById(userId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User with that id not found!"));
