@@ -6,6 +6,8 @@ import com.collins.leftover.service.RecurringExpenseService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -46,8 +48,11 @@ public class RecurringExpenseController {
 
     //
     @PostMapping
-    public RecurringExpenseResponseDto createRecurringExpense(@PathVariable("userId") @Positive Long userId, @Valid @RequestBody CreateRecurringExpenseRequestDto dto){
-        return recurringExpenseService.createRecurringExpense(userId, dto);
+    public RecurringExpenseResponseDto createRecurringExpense(@Valid @RequestBody CreateRecurringExpenseRequestDto dto){
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String email = authentication.getName();
+        return recurringExpenseService.createRecurringExpense(email, dto);
     }
 
     @GetMapping

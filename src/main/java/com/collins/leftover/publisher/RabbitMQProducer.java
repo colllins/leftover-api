@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class RabbitMQProducer {
 
-    @Value("${pay-period.closed.queue.name}")
+    @Value("${pay-period.exchange.name}")
     private String exchange;
 
     @Value("${pay-period.routing.key}")

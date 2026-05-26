@@ -26,6 +26,7 @@ public class RabbitMQConsumer {
     @RabbitListener(queues = {"${pay-period.closed.queue.name}"})
     public void consumeMessage(PayPeriodClosedEvent payPeriodClosedEvent){
 
+        LOGGER.info(String.format("Received JSON message -> %s", payPeriodClosedEvent.toString()));
 
         PayPeriod payPeriod = payPeriodRepository.findById(payPeriodClosedEvent.getPayPeriodId()).orElseThrow(() -> new RuntimeException("Pay period not found"));
 
@@ -41,7 +42,6 @@ public class RabbitMQConsumer {
 
         notificationService.createNotification(payPeriod.getUser(), title, message, false);
 
-        LOGGER.info(String.format("Received JSON message -> %s", payPeriodClosedEvent.toString()));
 
     }
 

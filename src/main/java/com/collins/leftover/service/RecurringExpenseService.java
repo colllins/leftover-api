@@ -23,8 +23,8 @@ public class RecurringExpenseService {
     private final RecurringExpenseRepository recurringExpenseRepository;
     private final UserRepository userRepository;
 
-    public RecurringExpenseResponseDto createRecurringExpense(Long userId, CreateRecurringExpenseRequestDto dto){
-        User user = userRepository.findById(userId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User with that id not found!"));
+    public RecurringExpenseResponseDto createRecurringExpense(String email, CreateRecurringExpenseRequestDto dto){
+        User user = userRepository.findByEmail(email).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User with that id not found!"));
 
         RecurringExpense recurringExpense = new RecurringExpense(user, dto.getName(), dto.getAmount(), dto.getRecurringType(), true);
         recurringExpenseRepository.save(recurringExpense);

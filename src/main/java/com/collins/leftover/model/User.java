@@ -2,6 +2,7 @@ package com.collins.leftover.model;
 
 import jakarta.persistence.*;
 
+import java.io.Serializable;
 import java.time.LocalDate;
 
 /**
@@ -9,7 +10,7 @@ import java.time.LocalDate;
  * It stores identity, onboarding, pay frequency, and simple audit timestamps.
  */
 @Entity
-public class User {
+public class User implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -25,5 +26,9 @@ public class NotificationService {
         notification.setCreatedAt(LocalDateTime.now());
 
         notificationRepository.save(notification);
+    }
+
+    public List<Notification> getLatestNotifications(String email) {
+        return notificationRepository.findTop20ByUser_EmailOrderByCreatedAtDesc(email);
     }
 }

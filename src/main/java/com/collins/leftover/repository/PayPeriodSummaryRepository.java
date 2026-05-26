@@ -9,4 +9,6 @@ public interface PayPeriodSummaryRepository extends JpaRepository<PayPeriodSumma
     Optional<PayPeriodSummary> findByPayPeriodId(Long payPeriodId);
 
     boolean existsByPayPeriodId(Long payPeriodId);
+
+    Optional<PayPeriodSummary> findByPayPeriodIdAndUserEmail(Long payPeriodId, String email);
 }

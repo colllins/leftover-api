@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
@@ -15,7 +16,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Setter
 @Getter
-public class PayPeriodSummary {
+public class PayPeriodSummary implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -32,6 +33,7 @@ public class PayPeriodSummary {
     private PayPeriod payPeriod;
     private BigDecimal income;
     private BigDecimal expenses;
+    private BigDecimal recurringExpenses;
     private BigDecimal leftOver;
     private LocalDateTime createdAt;
 }

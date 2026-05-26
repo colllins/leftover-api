@@ -3,11 +3,12 @@ package com.collins.leftover.model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
 @Entity
-public class PayPeriod {
+public class PayPeriod implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

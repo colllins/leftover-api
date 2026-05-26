@@ -17,7 +17,7 @@ public class ProjectSecurityConfig {
         http.csrf(csrfConfig->csrfConfig.disable())
                 .authorizeHttpRequests((requests)->requests
                         .requestMatchers("/api/users/pay-periods/**", "/api/users/recurring-expenses/**", "/api/users/transactions/**").authenticated()
-                        .requestMatchers("/api/users/register","/api/users/login", "/api/users/getUser","/api/users/logout", "/error").permitAll()
+                        .requestMatchers("/api/users/register","/api/users/login", "/api/users/getUser","/api/users/logout", "/api/users/notifications", "/error").permitAll()
                 );
 //        http.formLogin(flc->flc.loginPage("/api/users/login").usernameParameter("email").passwordParameter("pwd"));
 //        http.logout(loc->loc.logoutSuccessUrl("/api/users/logout")

@@ -8,7 +8,6 @@ import com.collins.leftover.model.Transaction;
 import com.collins.leftover.model.TransactionType;
 import com.collins.leftover.model.User;
 import com.collins.leftover.repository.PayPeriodRepository;
-import com.collins.leftover.repository.PayPeriodSummaryRepository;
 import com.collins.leftover.repository.TransactionRepository;
 import com.collins.leftover.repository.UserRepository;
 import jakarta.transaction.Transactional;
@@ -30,14 +29,14 @@ public class PayPeriodService {
     private final UserRepository userRepository;
     private final TransactionRepository transactionRepository;
     private final TransactionService transactionService;
-    private final PayPeriodSummaryRepository payPeriodSummaryRepository;
 
-    public PayPeriodResponseDto createPayPeriod(Long userId, CreatePayPeriodRequestDto createPayPeriodRequestDto){
+
+    public PayPeriodResponseDto createPayPeriod(String email, CreatePayPeriodRequestDto createPayPeriodRequestDto){
         //check if user exists
-        User user = userRepository.findById(userId).orElseThrow(()-> new ResponseStatusException(HttpStatus.NOT_FOUND, "User with that id Not Found!"));
+        User user = userRepository.findByEmail(email).orElseThrow(()-> new ResponseStatusException(HttpStatus.NOT_FOUND, "User with that email Not Found!"));
 
         //create the pay period on this specific user
-        payPeriodRepository.findAllByUser_Id(userId).forEach(period -> {
+        payPeriodRepository.findAllByUser_Id(user.getId()).forEach(period -> {
             period.setActive(false);
         });
         PayPeriod payPeriod = new PayPeriod(user, createPayPeriodRequestDto.getStartDate(), createPayPeriodRequestDto.getEndDate(), createPayPeriodRequestDto.getPlannedIncome(), true);
@@ -46,14 +45,18 @@ public class PayPeriodService {
         return new PayPeriodResponseDto(payPeriod.getId(), payPeriod.getStartDate(), payPeriod.getEndDate(), payPeriod.getPlannedIncome(), payPeriod.isActive());
     }
 
-    public List<PayPeriodResponseDto> getPayPeriodsForUser(Long userId){
+    public List<PayPeriodResponseDto> getPayPeriodsForUser(String email){
         List<PayPeriodResponseDto> payPeriods = new ArrayList<>();
 
         //check if user exists
-        if(!userRepository.existsById(userId)) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User with that id Not Found!");
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "User with that email not found!"
+                ));
 
         //fetch all payPeriods and foreach payPeriod check if that payPeriod userId equals userId passed in the header and add to the list
-        payPeriodRepository.findAllByUser_Id(userId).forEach(payPeriod -> {
+        payPeriodRepository.findAllByUser_Id(user.getId()).forEach(payPeriod -> {
                 PayPeriodResponseDto periodResponseDto = new PayPeriodResponseDto(payPeriod.getId(), payPeriod.getStartDate(), payPeriod.getEndDate(), payPeriod.getPlannedIncome(), payPeriod.isActive());
                 payPeriods.add(periodResponseDto);
         });

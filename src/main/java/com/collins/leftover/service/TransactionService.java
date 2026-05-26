@@ -26,12 +26,12 @@ public class TransactionService {
     private final UserRepository userRepository;
     private final PayPeriodRepository payPeriodRepository;
 
-    public TransactionResponseDto createTransaction(Long userId, CreateTransactionRequestDto dto){
+    public TransactionResponseDto createTransaction(String email, CreateTransactionRequestDto dto){
         //check if user exists
-        User user = userRepository.findById(userId).orElseThrow(()-> new ResponseStatusException(HttpStatus.NOT_FOUND, "User with that id Not Found!"));
+        User user = userRepository.findByEmail(email).orElseThrow(()-> new ResponseStatusException(HttpStatus.NOT_FOUND, "User with that id Not Found!"));
 
 
-        List<PayPeriod> payPeriods = payPeriodRepository.findAllByUser_Id(userId).stream().filter(PayPeriod::isActive).toList();
+        List<PayPeriod> payPeriods = payPeriodRepository.findAllByUser_Id(user.getId()).stream().filter(PayPeriod::isActive).toList();
 
         if (payPeriods.isEmpty()) {
             throw new ResponseStatusException(

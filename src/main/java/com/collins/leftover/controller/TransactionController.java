@@ -7,6 +7,8 @@ import com.collins.leftover.service.TransactionService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -48,8 +50,10 @@ public class TransactionController {
     //
 
     @PostMapping
-    public TransactionResponseDto createTransaction(@PathVariable("userId") @Positive Long userId, @Valid @RequestBody CreateTransactionRequestDto dto){
-        return transactionService.createTransaction(userId, dto);
+    public TransactionResponseDto createTransaction(@Valid @RequestBody CreateTransactionRequestDto dto){
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String email = authentication.getName();
+        return transactionService.createTransaction(email, dto);
     }
 
     @GetMapping("/pay-periods/{payPeriodId}")
