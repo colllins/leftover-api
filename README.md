@@ -110,70 +110,11 @@ GET /api/pay-periods/{id}/summary
 GET /api/notifications
 GET /api/notifications/{id}
 POST /api/notifications/{id}/mark-as-read
-```
 
-## Running Locally
-
-### 1. Clone the repository
-
-```bash
-git clone https://github.com/YOUR_USERNAME/leftover-api.git
-cd leftover-api
-```
-
-### 2. Configure the database
-
-Update `src/main/resources/application.properties` with your local database credentials:
-
-```properties
-spring.datasource.url=jdbc:mysql://localhost:3306/leftover_api
-spring.datasource.username=root
-spring.datasource.password=your_password
-```
-
-### 3. Configure Redis and RabbitMQ
-
-Make sure Redis and RabbitMQ are running locally.
-
-Example configuration:
-
-```properties
-spring.data.redis.host=localhost
-spring.data.redis.port=6379
-
-spring.rabbitmq.host=localhost
-spring.rabbitmq.port=5672
-spring.rabbitmq.username=guest
-spring.rabbitmq.password=guest
-```
-
-### 4. Run the application
-
-On macOS/Linux:
-
-```bash
-./mvnw spring-boot:run
-```
-
-On Windows:
-
-```bash
-mvnw.cmd spring-boot:run
-```
 
 ## Current Version
 
 This is the initial backend version of Leftover API, focused on authentication, personal finance tracking, pay period summaries, recurring expenses, transactions, Redis caching, RabbitMQ messaging, and background notification worker processing.
-
-## Future Improvements
-
-- JWT-based authentication
-- Docker Compose setup
-- OpenAPI/Swagger documentation
-- Unit and integration tests
-- Improved global exception handling
-- Email or SMS notification delivery
-- Dashboard-ready financial analytics endpoints
 
 ## Author
 
