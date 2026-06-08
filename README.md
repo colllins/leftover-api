@@ -177,4 +177,4 @@ This is the initial backend version of Leftover API, focused on authentication, 
 
 ## Author
 
-Built by Martin Alemajoh.
+Built by Collins Lekeaka.
