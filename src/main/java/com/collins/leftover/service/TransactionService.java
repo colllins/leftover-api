@@ -22,16 +22,18 @@ import java.util.List;
 @Transactional
 @RequiredArgsConstructor
 public class TransactionService {
+
     private final TransactionRepository transactionRepository;
     private final UserRepository userRepository;
     private final PayPeriodRepository payPeriodRepository;
 
-    public TransactionResponseDto createTransaction(String email, CreateTransactionRequestDto dto){
-        //check if user exists
-        User user = userRepository.findByEmail(email).orElseThrow(()-> new ResponseStatusException(HttpStatus.NOT_FOUND, "User with that id Not Found!"));
+    public TransactionResponseDto createTransaction(String email, CreateTransactionRequestDto dto) {
+        User user = getUserByEmail(email);
 
-
-        List<PayPeriod> payPeriods = payPeriodRepository.findAllByUser_Id(user.getId()).stream().filter(PayPeriod::isActive).toList();
+        List<PayPeriod> payPeriods = payPeriodRepository.findAllByUser_Id(user.getId())
+                .stream()
+                .filter(PayPeriod::isActive)
+                .toList();
 
         if (payPeriods.isEmpty()) {
             throw new ResponseStatusException(
@@ -42,97 +44,111 @@ public class TransactionService {
 
         PayPeriod activePayPeriod = payPeriods.get(0);
 
-        Transaction transaction = new Transaction(user, activePayPeriod, dto.getType(),dto.getCategory(), dto.getAmount(), dto.getDate(), dto.getDescription());
+        Transaction transaction = new Transaction(
+                user,
+                activePayPeriod,
+                dto.getType(),
+                dto.getCategory(),
+                dto.getAmount(),
+                dto.getDate(),
+                dto.getDescription()
+        );
+
         transactionRepository.save(transaction);
 
-        return new TransactionResponseDto(transaction.getId(), transaction.getType(), transaction.getAmount(), transaction.getCategory(), transaction.getDate(), transaction.getDescription());
+        return mapToTransactionResponseDto(transaction);
     }
 
-    public List<TransactionResponseDto> getTransactionsForPayPeriod(Long userId, Long payPeriodId){
+    public List<TransactionResponseDto> getTransactionsForPayPeriod(String email, Long payPeriodId) {
+        User user = getUserByEmail(email);
+
+        PayPeriod payPeriod = payPeriodRepository.findByIdAndUser_Id(payPeriodId, user.getId())
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "Pay period not found for this user"
+                ));
 
         List<TransactionResponseDto> transactions = new ArrayList<>();
 
-        //check if user exists
-        if(!userRepository.existsById(userId)) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User with that id Not Found!");
+        transactionRepository.findAllByUser_IdAndPayPeriod_IdOrderByDateDesc(user.getId(), payPeriod.getId())
+                .forEach(transaction -> transactions.add(mapToTransactionResponseDto(transaction)));
 
-        //check if the pay period is tied to the user
-        PayPeriod payPeriod = payPeriodRepository.findById(payPeriodId)
-                        .filter(p->p.getUser().getId().equals(userId))
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Pay period not found for this user"));
-
-        //get all transactions for this user in that pay period then create a transaction response for each and return the list
-      transactionRepository.findAllByUser_IdAndPayPeriod_IdOrderByDateDesc(userId, payPeriodId).forEach(transaction ->
-//          TransactionResponseDto dto = new TransactionResponseDto(transaction.getId(), transaction.getType(), transaction.getAmount(), transaction.getCategory(), transaction.getDate(), transaction.getDescription());
-
-          transactions.add(
-                  new TransactionResponseDto(
-                          transaction.getId(),
-                          transaction.getType(),
-                          transaction.getAmount(),
-                          transaction.getCategory(),
-                          transaction.getDate(),
-                          transaction.getDescription())
-                  )
-      );
-
-      return transactions;
+        return transactions;
     }
 
-    public TransactionResponseDto getTransactionById(Long userId, Long transactionId){
+    public TransactionResponseDto getTransactionById(String email, Long transactionId) {
+        User user = getUserByEmail(email);
 
-        Transaction transaction = transactionRepository.findByIdAndUser_Id(transactionId, userId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "No Transaction found with that id"));
+        Transaction transaction = transactionRepository.findByIdAndUser_Id(transactionId, user.getId())
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "No transaction found with that id for this user"
+                ));
 
-        return new TransactionResponseDto(transaction.getId(), transaction.getType(), transaction.getAmount(), transaction.getCategory(), transaction.getDate(), transaction.getDescription());
+        return mapToTransactionResponseDto(transaction);
     }
 
-    public TransactionResponseDto updateTransaction(Long userId, Long transactionId, UpdateTransactionDto dto){
+    public TransactionResponseDto updateTransaction(String email, Long transactionId, UpdateTransactionDto dto) {
+        User user = getUserByEmail(email);
 
-        User user = userRepository.findById(userId).orElseThrow(()-> new ResponseStatusException(HttpStatus.NOT_FOUND, "User with that id Not Found!"));
+        Transaction transaction = transactionRepository.findByIdAndUser_Id(transactionId, user.getId())
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "No transaction found with that id for this user"
+                ));
 
-        Transaction transaction = transactionRepository.findByIdAndUser_Id(transactionId, userId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "No Transaction found with that id"));
+        if (dto.getType() != null) transaction.setType(dto.getType());
+        if (dto.getAmount() != null) transaction.setAmount(dto.getAmount());
+        if (dto.getCategory() != null) transaction.setCategory(dto.getCategory());
+        if (dto.getDate() != null) transaction.setDate(dto.getDate());
+        if (dto.getDescription() != null) transaction.setDescription(dto.getDescription());
 
-
-        if(dto.getType()!=null) transaction.setType(dto.getType());
-
-        if(dto.getAmount()!=null) transaction.setAmount(dto.getAmount());
-
-        if(dto.getCategory()!=null) transaction.setCategory(dto.getCategory());
-
-        if(dto.getDate()!=null) transaction.setDate(dto.getDate());
-
-        if(dto.getDescription()!=null) transaction.setDescription(dto.getDescription());
-
-
-        return new TransactionResponseDto(transaction.getId(), transaction.getType(), transaction.getAmount(), transaction.getCategory(), transaction.getDate(), transaction.getDescription());
+        return mapToTransactionResponseDto(transaction);
     }
 
-    public void deleteTransaction(Long userId, Long transactionId){
+    public void deleteTransaction(String email, Long transactionId) {
+        User user = getUserByEmail(email);
 
-        Transaction transaction = transactionRepository.findByIdAndUser_Id(transactionId, userId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "No Transaction found with that id"));
+        Transaction transaction = transactionRepository.findByIdAndUser_Id(transactionId, user.getId())
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "No transaction found with that id for this user"
+                ));
 
         transactionRepository.delete(transaction);
     }
 
-    public List<TransactionResponseDto> getRecentTransactions(Long userId, int limit){
+    public List<TransactionResponseDto> getRecentTransactions(Long userId, int limit) {
+        if (!userRepository.existsById(userId)) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User with that id not found!");
+        }
 
         List<TransactionResponseDto> transactions = new ArrayList<>();
 
-        //check if user exists
-        if(!userRepository.existsById(userId)) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User with that id Not Found!");
+        transactionRepository.findAllByUser_IdOrderByDateDesc(userId)
+                .stream()
+                .limit(limit)
+                .forEach(transaction -> transactions.add(mapToTransactionResponseDto(transaction)));
 
-         transactionRepository.findAllByUser_IdOrderByDateDesc(userId).stream().limit(limit).forEach(transaction ->
-             transactions.add(
-                     new TransactionResponseDto(
-                             transaction.getId(),
-                             transaction.getType(),
-                             transaction.getAmount(),
-                             transaction.getCategory(),
-                             transaction.getDate(),
-                             transaction.getDescription()
-                     )
-             )
-         );
+        return transactions;
+    }
 
-         return transactions;
+    private User getUserByEmail(String email) {
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "User with that email not found!"
+                ));
+    }
+
+    private TransactionResponseDto mapToTransactionResponseDto(Transaction transaction) {
+        return new TransactionResponseDto(
+                transaction.getId(),
+                transaction.getType(),
+                transaction.getAmount(),
+                transaction.getCategory(),
+                transaction.getDate(),
+                transaction.getDescription()
+        );
     }
 }

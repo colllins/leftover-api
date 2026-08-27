@@ -22,57 +22,49 @@ public class TransactionController {
 
     private final TransactionService transactionService;
 
-//    @PostMapping("/api/users/{userId}/transactions")
-//    public TransactionResponseDto createTransaction(@PathVariable("userId") @Positive Long userId, @Valid @RequestBody CreateTransactionRequestDto dto){
-//        return transactionService.createTransaction(userId, dto);
-//    }
-
-//    @GetMapping("/api/users/{userId}/transactions/pay-periods/{payPeriodId}")
-//    public List<TransactionResponseDto> getAllTransactionsForPayPeriod(@PathVariable("userId") @Positive Long userId, @PathVariable("payPeriodId") @Positive Long payPeriodId){
-//        return transactionService.getTransactionsForPayPeriod(userId, payPeriodId);
-//    }
-
-//    @GetMapping("/api/users/{userId}/transactions/{transactionId}")
-//    public TransactionResponseDto getTransactionById(@PathVariable("userId") @Positive Long userId, @PathVariable("transactionId") @Positive Long transactionId){
-//        return transactionService.getTransactionById(userId, transactionId);
-//    }
-
-//    @PatchMapping("/api/users/{userId}/transactions/{transactionId}")
-//    public TransactionResponseDto updateTransaction(@PathVariable("userId") @Positive Long userId, @PathVariable("transactionId") @Positive Long transactionId, @Valid @RequestBody UpdateTransactionDto dto){
-//        return transactionService.updateTransaction(userId, transactionId, dto);
-//    }
-
-//    @DeleteMapping("/api/users/{userId}/transactions/{transactionId}")
-//    public void deleteTransaction(@PathVariable("userId") @Positive Long userId, @PathVariable("transactionId") @Positive Long transactionId){
-//         transactionService.deleteTransaction(userId, transactionId);
-//    }
-
-    //
-
     @PostMapping
-    public TransactionResponseDto createTransaction(@Valid @RequestBody CreateTransactionRequestDto dto){
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String email = authentication.getName();
+    public TransactionResponseDto createTransaction(
+            @Valid @RequestBody CreateTransactionRequestDto dto) {
+
+        String email = getLoggedInUserEmail();
         return transactionService.createTransaction(email, dto);
     }
 
     @GetMapping("/pay-periods/{payPeriodId}")
-    public List<TransactionResponseDto> getAllTransactionsForPayPeriod(@PathVariable("userId") @Positive Long userId, @PathVariable("payPeriodId") @Positive Long payPeriodId){
-        return transactionService.getTransactionsForPayPeriod(userId, payPeriodId);
+    public List<TransactionResponseDto> getAllTransactionsForPayPeriod(
+            @PathVariable("payPeriodId") @Positive Long payPeriodId) {
+
+        String email = getLoggedInUserEmail();
+        return transactionService.getTransactionsForPayPeriod(email, payPeriodId);
     }
 
     @GetMapping("/{transactionId}")
-    public TransactionResponseDto getTransactionById(@PathVariable("userId") @Positive Long userId, @PathVariable("transactionId") @Positive Long transactionId){
-        return transactionService.getTransactionById(userId, transactionId);
+    public TransactionResponseDto getTransactionById(
+            @PathVariable("transactionId") @Positive Long transactionId) {
+
+        String email = getLoggedInUserEmail();
+        return transactionService.getTransactionById(email, transactionId);
     }
 
     @PatchMapping("/{transactionId}")
-    public TransactionResponseDto updateTransaction(@PathVariable("userId") @Positive Long userId, @PathVariable("transactionId") @Positive Long transactionId, @Valid @RequestBody UpdateTransactionDto dto){
-        return transactionService.updateTransaction(userId, transactionId, dto);
+    public TransactionResponseDto updateTransaction(
+            @PathVariable("transactionId") @Positive Long transactionId,
+            @Valid @RequestBody UpdateTransactionDto dto) {
+
+        String email = getLoggedInUserEmail();
+        return transactionService.updateTransaction(email, transactionId, dto);
     }
 
     @DeleteMapping("/{transactionId}")
-    public void deleteTransaction(@PathVariable("userId") @Positive Long userId, @PathVariable("transactionId") @Positive Long transactionId){
-        transactionService.deleteTransaction(userId, transactionId);
+    public void deleteTransaction(
+            @PathVariable("transactionId") @Positive Long transactionId) {
+
+        String email = getLoggedInUserEmail();
+        transactionService.deleteTransaction(email, transactionId);
+    }
+
+    private String getLoggedInUserEmail() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        return authentication.getName();
     }
 }
