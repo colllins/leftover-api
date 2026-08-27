@@ -1,6 +1,7 @@
 package com.collins.leftover.service;
 
 import com.collins.leftover.model.*;
+import com.collins.leftover.repository.PayPeriodRepository;
 import com.collins.leftover.repository.PayPeriodSummaryRepository;
 import com.collins.leftover.repository.RecurringExpenseRepository;
 import com.collins.leftover.repository.TransactionRepository;
@@ -29,6 +30,7 @@ public class PayPeriodSummaryService {
     private final PayPeriodSummaryRepository payPeriodSummaryRepository;
     private final RecurringExpenseRepository recurringExpenseRepository;
     private final UserRepository userRepository;
+    private final PayPeriodRepository payPeriodRepository;
 
     @CachePut(value = "payPeriodSummaries", key = "#payPeriod.user.email + ':' + #payPeriod.id")
     public PayPeriodSummary createSummary(PayPeriod payPeriod) {
@@ -41,6 +43,7 @@ public class PayPeriodSummaryService {
                 .filter(transaction -> transaction.getType() == TransactionType.INCOME)
                 .map(Transaction::getAmount)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
+
         income = income.add(transactionIncome);
 
         BigDecimal transactionExpenses = transactionRepository
@@ -49,7 +52,9 @@ public class PayPeriodSummaryService {
                 .filter(transaction -> transaction.getType() == TransactionType.EXPENSE)
                 .map(Transaction::getAmount)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
-        BigDecimal recurringExpenses = recurringExpenseRepository.findAllByUser_Id(payPeriod.getUser().getId())
+
+        BigDecimal recurringExpenses = recurringExpenseRepository
+                .findAllByUser_Id(payPeriod.getUser().getId())
                 .stream()
                 .filter(RecurringExpense::isActive)
                 .map(RecurringExpense::getAmount)
@@ -70,15 +75,28 @@ public class PayPeriodSummaryService {
         return payPeriodSummaryRepository.save(summary);
     }
 
-    @Cacheable(value = "payPeriodSummaries", key="#email + ':' + #payPeriodId")
-    public PayPeriodSummary getPayPeriodSummary(String email, Long payPeriodId){
+    @Cacheable(value = "payPeriodSummaries", key = "#email + ':' + #payPeriodId")
+    public PayPeriodSummary getPayPeriodSummary(String email, Long payPeriodId) {
 
         LOGGER.info("Fetching pay period summary from database for payPeriodId: {}", payPeriodId);
 
-        User user = userRepository.findByEmail(email).orElseThrow(()-> new ResponseStatusException(HttpStatus.NOT_FOUND, "User with that email Not Found!"));
+        User user = getUserByEmail(email);
 
-        PayPeriodSummary payPeriodSummary = payPeriodSummaryRepository.findByPayPeriodIdAndUserEmail(payPeriodId, email).orElseThrow(()-> new RuntimeException("Pay period doest not exist"));
+        PayPeriod payPeriod = payPeriodRepository.findByIdAndUser_Id(payPeriodId, user.getId())
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "Pay period not found for this user"
+                ));
 
-        return payPeriodSummary;
+        return payPeriodSummaryRepository.findByPayPeriodIdAndUserEmail(payPeriodId, email)
+                .orElseGet(() -> createSummary(payPeriod));
+    }
+
+    private User getUserByEmail(String email) {
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "User with that email not found!"
+                ));
     }
 }
