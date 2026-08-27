@@ -18,60 +18,49 @@ import java.util.List;
 @RequestMapping("/api/users/recurring-expenses")
 @RequiredArgsConstructor
 public class RecurringExpenseController {
+
     private final RecurringExpenseService recurringExpenseService;
 
-
-//    @PostMapping("/api/users/{userId}/recurring-expenses")
-//    public RecurringExpenseResponseDto createRecurringExpense(@PathVariable("userId") @Positive Long userId, @Valid @RequestBody CreateRecurringExpenseRequestDto dto){
-//        return recurringExpenseService.createRecurringExpense(userId, dto);
-//    }
-
-//    @GetMapping("/api/users/{userId}/recurring-expenses")
-//    public List<RecurringExpenseResponseDto> getUserRecurringExpenses(@PathVariable("userId") @Positive Long userId){
-//        return recurringExpenseService.getActiveRecurringExpenses(userId);
-//    }
-
-//    @GetMapping("/api/users/{userId}/recurring-expenses/{expenseId}")
-//    public RecurringExpenseResponseDto getRecurringExpenseById(@PathVariable("userId") @Positive Long userId, @PathVariable("expenseId") @Positive Long recurringExpenseId){
-//        return recurringExpenseService.getRecurringExpenseById(userId, recurringExpenseId);
-//    }
-
-//    @PatchMapping("/api/users/{userId}/recurring-expenses/{expenseId}/deactivate")
-//    public void deactivateRecurringExpense(@PathVariable("userId") @Positive Long userId, @PathVariable("expenseId") @Positive Long expenseId){
-//        recurringExpenseService.deactivateRecurringExpense(userId, expenseId);
-//    }
-
-//    @DeleteMapping("/api/users/{userId}/recurring-expenses/{expenseId}")
-//    public void deleteRecurringExpense(@PathVariable("userId") @Positive Long userId, @PathVariable("expenseId") @Positive Long expenseId){
-//        recurringExpenseService.deleteRecurringExpense(userId, expenseId);
-//    }
-
-    //
     @PostMapping
-    public RecurringExpenseResponseDto createRecurringExpense(@Valid @RequestBody CreateRecurringExpenseRequestDto dto){
+    public RecurringExpenseResponseDto createRecurringExpense(
+            @Valid @RequestBody CreateRecurringExpenseRequestDto dto) {
 
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String email = authentication.getName();
+        String email = getLoggedInUserEmail();
         return recurringExpenseService.createRecurringExpense(email, dto);
     }
 
     @GetMapping
-    public List<RecurringExpenseResponseDto> getUserRecurringExpenses(@PathVariable("userId") @Positive Long userId){
-        return recurringExpenseService.getActiveRecurringExpenses(userId);
+    public List<RecurringExpenseResponseDto> getUserRecurringExpenses() {
+        String email = getLoggedInUserEmail();
+        return recurringExpenseService.getActiveRecurringExpenses(email);
     }
 
     @GetMapping("/{expenseId}")
-    public RecurringExpenseResponseDto getRecurringExpenseById(@PathVariable("userId") @Positive Long userId, @PathVariable("expenseId") @Positive Long recurringExpenseId){
-        return recurringExpenseService.getRecurringExpenseById(userId, recurringExpenseId);
+    public RecurringExpenseResponseDto getRecurringExpenseById(
+            @PathVariable("expenseId") @Positive Long recurringExpenseId) {
+
+        String email = getLoggedInUserEmail();
+        return recurringExpenseService.getRecurringExpenseById(email, recurringExpenseId);
     }
 
     @PatchMapping("/{expenseId}/deactivate")
-    public void deactivateRecurringExpense(@PathVariable("userId") @Positive Long userId, @PathVariable("expenseId") @Positive Long expenseId){
-        recurringExpenseService.deactivateRecurringExpense(userId, expenseId);
+    public void deactivateRecurringExpense(
+            @PathVariable("expenseId") @Positive Long expenseId) {
+
+        String email = getLoggedInUserEmail();
+        recurringExpenseService.deactivateRecurringExpense(email, expenseId);
     }
 
     @DeleteMapping("/{expenseId}")
-    public void deleteRecurringExpense(@PathVariable("userId") @Positive Long userId, @PathVariable("expenseId") @Positive Long expenseId){
-        recurringExpenseService.deleteRecurringExpense(userId, expenseId);
+    public void deleteRecurringExpense(
+            @PathVariable("expenseId") @Positive Long expenseId) {
+
+        String email = getLoggedInUserEmail();
+        recurringExpenseService.deleteRecurringExpense(email, expenseId);
+    }
+
+    private String getLoggedInUserEmail() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        return authentication.getName();
     }
 }
