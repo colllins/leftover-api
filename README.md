@@ -4,6 +4,8 @@ Leftover API is a personal finance backend system built with Java and Spring Boo
 
 The project also includes a background notification worker service that handles asynchronous pay period summary generation using RabbitMQ messaging, scheduled jobs, and Redis caching.
 
+The app is fully dockerized
+
 ## Tech Stack
 
 - Java
