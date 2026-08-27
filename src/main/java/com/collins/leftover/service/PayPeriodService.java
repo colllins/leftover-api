@@ -30,98 +30,104 @@ public class PayPeriodService {
     private final TransactionRepository transactionRepository;
     private final TransactionService transactionService;
 
+    public PayPeriodResponseDto createPayPeriod(String email, CreatePayPeriodRequestDto createPayPeriodRequestDto) {
+        User user = getUserByEmail(email);
 
-    public PayPeriodResponseDto createPayPeriod(String email, CreatePayPeriodRequestDto createPayPeriodRequestDto){
-        //check if user exists
-        User user = userRepository.findByEmail(email).orElseThrow(()-> new ResponseStatusException(HttpStatus.NOT_FOUND, "User with that email Not Found!"));
-
-        //create the pay period on this specific user
         payPeriodRepository.findAllByUser_Id(user.getId()).forEach(period -> {
             period.setActive(false);
         });
-        PayPeriod payPeriod = new PayPeriod(user, createPayPeriodRequestDto.getStartDate(), createPayPeriodRequestDto.getEndDate(), createPayPeriodRequestDto.getPlannedIncome(), true);
+
+        PayPeriod payPeriod = new PayPeriod(
+                user,
+                createPayPeriodRequestDto.getStartDate(),
+                createPayPeriodRequestDto.getEndDate(),
+                createPayPeriodRequestDto.getPlannedIncome(),
+                true
+        );
+
         payPeriodRepository.save(payPeriod);
 
-        return new PayPeriodResponseDto(payPeriod.getId(), payPeriod.getStartDate(), payPeriod.getEndDate(), payPeriod.getPlannedIncome(), payPeriod.isActive());
+        return mapToPayPeriodResponseDto(payPeriod);
     }
 
-    public List<PayPeriodResponseDto> getPayPeriodsForUser(String email){
+    public List<PayPeriodResponseDto> getPayPeriodsForUser(String email) {
+        User user = getUserByEmail(email);
+
         List<PayPeriodResponseDto> payPeriods = new ArrayList<>();
 
-        //check if user exists
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND,
-                        "User with that email not found!"
-                ));
-
-        //fetch all payPeriods and foreach payPeriod check if that payPeriod userId equals userId passed in the header and add to the list
         payPeriodRepository.findAllByUser_Id(user.getId()).forEach(payPeriod -> {
-                PayPeriodResponseDto periodResponseDto = new PayPeriodResponseDto(payPeriod.getId(), payPeriod.getStartDate(), payPeriod.getEndDate(), payPeriod.getPlannedIncome(), payPeriod.isActive());
-                payPeriods.add(periodResponseDto);
+            payPeriods.add(mapToPayPeriodResponseDto(payPeriod));
         });
 
         return payPeriods;
     }
 
-    public  PayPeriodResponseDto getPayPeriodById(Long userId, Long payPeriodId){
-        //check if user exists
-        if(!userRepository.existsById(userId)) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User with that id Not Found!");
+    public PayPeriodResponseDto getPayPeriodById(String email, Long payPeriodId) {
+        User user = getUserByEmail(email);
 
-        PayPeriod payPeriod = payPeriodRepository.findByIdAndUser_Id(payPeriodId, userId).orElseThrow(()-> new ResponseStatusException(HttpStatus.NOT_FOUND, "PayPeriod with that id Not Found!"));
+        PayPeriod payPeriod = payPeriodRepository.findByIdAndUser_Id(payPeriodId, user.getId())
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "Pay period with that id not found for this user!"
+                ));
 
-        return new PayPeriodResponseDto(payPeriod.getId(), payPeriod.getStartDate(), payPeriod.getEndDate(), payPeriod.getPlannedIncome(), payPeriod.isActive());
+        return mapToPayPeriodResponseDto(payPeriod);
     }
 
-    public DashboardSummaryResponseDto getPayPeriodSummary(Long userId, Long payPeriodId, int limit){
+    public DashboardSummaryResponseDto getPayPeriodSummary(String email, Long payPeriodId, int limit) {
+        User user = getUserByEmail(email);
+
         BigDecimal income = BigDecimal.ZERO;
         BigDecimal expense = BigDecimal.ZERO;
-        BigDecimal leftOver;
 
-        List<Transaction> transactions = transactionRepository.findAllByUser_IdAndPayPeriod_IdOrderByDateDesc(userId, payPeriodId);
+        List<Transaction> transactions =
+                transactionRepository.findAllByUser_IdAndPayPeriod_IdOrderByDateDesc(user.getId(), payPeriodId);
 
-        if(!transactions.isEmpty()) {
-            for (Transaction transaction : transactions) {
-                if (transaction.getType() == TransactionType.INCOME) {
-                    income = income.add(transaction.getAmount());
-                } else if (transaction.getType() == TransactionType.EXPENSE) {
-                    expense = expense.add(transaction.getAmount());
-                }
-            }
-        }else{
+        if (transactions.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No transactions for this pay period");
         }
 
-        PayPeriodResponseDto payPeriod = getPayPeriodById(userId, payPeriodId);
+        for (Transaction transaction : transactions) {
+            if (transaction.getType() == TransactionType.INCOME) {
+                income = income.add(transaction.getAmount());
+            } else if (transaction.getType() == TransactionType.EXPENSE) {
+                expense = expense.add(transaction.getAmount());
+            }
+        }
+
+        PayPeriodResponseDto payPeriod = getPayPeriodById(email, payPeriodId);
 
         income = income.add(payPeriod.getPlannedIncome());
-        leftOver = income.subtract(expense);
 
+        BigDecimal leftOver = income.subtract(expense);
 
-       return new DashboardSummaryResponseDto(payPeriodId, payPeriod.getStartDate(), payPeriod.getEndDate(),payPeriod.getPlannedIncome(), income, expense, leftOver, transactionService.getRecentTransactions(userId, limit));
+        return new DashboardSummaryResponseDto(
+                payPeriodId,
+                payPeriod.getStartDate(),
+                payPeriod.getEndDate(),
+                payPeriod.getPlannedIncome(),
+                income,
+                expense,
+                leftOver,
+                transactionService.getRecentTransactions(user.getId(), limit)
+        );
     }
 
-//    public PayPeriodSummary createSummary(PayPeriod payPeriod) {
-//
-//        BigDecimal income = payPeriod.getPlannedIncome();
-//
-//        BigDecimal expenses = transactionRepository
-//                .findAllByPayPeriodId(payPeriod.getId())
-//                .stream()
-//                .map(Transaction::getAmount)
-//                .reduce(BigDecimal.ZERO, BigDecimal::add);
-//
-//        BigDecimal leftOver = income.subtract(expenses);
-//
-//        PayPeriodSummary summary = new PayPeriodSummary();
-//        summary.setUser(payPeriod.getUser());
-//        summary.setPayPeriod(payPeriod);
-//        summary.setIncome(income);
-//        summary.setExpenses(expenses);
-//        summary.setLeftOver(leftOver);
-//        summary.setCreatedAt(LocalDateTime.now());
-//
-//        return payPeriodSummaryRepository.save(summary);
-//    }
+    private User getUserByEmail(String email) {
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "User with that email not found!"
+                ));
+    }
 
+    private PayPeriodResponseDto mapToPayPeriodResponseDto(PayPeriod payPeriod) {
+        return new PayPeriodResponseDto(
+                payPeriod.getId(),
+                payPeriod.getStartDate(),
+                payPeriod.getEndDate(),
+                payPeriod.getPlannedIncome(),
+                payPeriod.isActive()
+        );
+    }
 }
