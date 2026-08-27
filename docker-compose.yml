@@ -1,0 +1,39 @@
+services:
+  mysql:
+    image: mysql:8.4
+    container_name: leftover-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+      MYSQL_DATABASE: leftoverapi
+    ports:
+      - "3307:3306"
+    volumes:
+      - leftover_mysql_data:/var/lib/mysql
+
+  rabbitmq:
+    image: rabbitmq:4.3.0-management
+    container_name: leftover-rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+
+  redis:
+    image: redis:7.4
+    container_name: leftover-redis
+    ports:
+      - "6379:6379"
+
+  leftover-api:
+    build: .
+    container_name: leftover-api
+    depends_on:
+      - mysql
+      - rabbitmq
+      - redis
+    ports:
+      - "8080:8080"
+    environment:
+      DB_PASSWORD: ${DB_PASSWORD}
+
+volumes:
+  leftover_mysql_data:
