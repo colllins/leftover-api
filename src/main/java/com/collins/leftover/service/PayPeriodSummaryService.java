@@ -1,11 +1,9 @@
 package com.collins.leftover.service;
 
+import com.collins.leftover.dto.payperiod.PayPeriodSummaryResponseDto;
+import com.collins.leftover.dto.transaction.TransactionResponseDto;
 import com.collins.leftover.model.*;
-import com.collins.leftover.repository.PayPeriodRepository;
-import com.collins.leftover.repository.PayPeriodSummaryRepository;
-import com.collins.leftover.repository.RecurringExpenseRepository;
-import com.collins.leftover.repository.TransactionRepository;
-import com.collins.leftover.repository.UserRepository;
+import com.collins.leftover.repository.*;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
@@ -18,6 +16,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 @Transactional
@@ -76,7 +75,7 @@ public class PayPeriodSummaryService {
     }
 
     @Cacheable(value = "payPeriodSummaries", key = "#email + ':' + #payPeriodId")
-    public PayPeriodSummary getPayPeriodSummary(String email, Long payPeriodId) {
+    public PayPeriodSummaryResponseDto getPayPeriodSummary(String email, Long payPeriodId) {
 
         LOGGER.info("Fetching pay period summary from database for payPeriodId: {}", payPeriodId);
 
@@ -88,8 +87,32 @@ public class PayPeriodSummaryService {
                         "Pay period not found for this user"
                 ));
 
-        return payPeriodSummaryRepository.findByPayPeriodIdAndUserEmail(payPeriodId, email)
+        PayPeriodSummary summary = payPeriodSummaryRepository
+                .findByPayPeriodIdAndUserEmail(payPeriodId, email)
                 .orElseGet(() -> createSummary(payPeriod));
+
+        List<TransactionResponseDto> transactions = transactionRepository
+                .findAllByUser_IdAndPayPeriod_IdOrderByDateDesc(user.getId(), payPeriodId)
+                .stream()
+                .map(transaction -> new TransactionResponseDto(
+                        transaction.getId(),
+                        transaction.getType(),
+                        transaction.getAmount(),
+                        transaction.getCategory(),
+                        transaction.getDate(),
+                        transaction.getDescription()
+                ))
+                .toList();
+
+        return new PayPeriodSummaryResponseDto(
+                summary.getId(),
+                payPeriod.getStartDate(),
+                payPeriod.getEndDate(),
+                summary.getIncome(),
+                summary.getExpenses(),
+                summary.getLeftOver(),
+                transactions
+        );
     }
 
     private User getUserByEmail(String email) {

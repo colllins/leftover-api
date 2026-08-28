@@ -2,7 +2,7 @@ package com.collins.leftover.controller;
 
 import com.collins.leftover.dto.payperiod.CreatePayPeriodRequestDto;
 import com.collins.leftover.dto.payperiod.PayPeriodResponseDto;
-import com.collins.leftover.model.PayPeriodSummary;
+import com.collins.leftover.dto.payperiod.PayPeriodSummaryResponseDto;
 import com.collins.leftover.service.PayPeriodService;
 import com.collins.leftover.service.PayPeriodSummaryService;
 import jakarta.validation.Valid;
@@ -47,7 +47,7 @@ public class PayPeriodController {
     }
 
     @GetMapping("/{payPeriodId}/summary")
-    public PayPeriodSummary getPayPeriodSummary(
+    public PayPeriodSummaryResponseDto getPayPeriodSummary(
             @PathVariable @Positive Long payPeriodId) {
 
         String email = getLoggedInUserEmail();
