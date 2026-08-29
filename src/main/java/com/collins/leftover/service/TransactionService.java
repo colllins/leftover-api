@@ -11,6 +11,7 @@ import com.collins.leftover.repository.TransactionRepository;
 import com.collins.leftover.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -27,6 +28,7 @@ public class TransactionService {
     private final UserRepository userRepository;
     private final PayPeriodRepository payPeriodRepository;
 
+    @CacheEvict(value = "payPeriodSummaries", allEntries = true)
     public TransactionResponseDto createTransaction(String email, CreateTransactionRequestDto dto) {
         User user = getUserByEmail(email);
 
@@ -88,6 +90,7 @@ public class TransactionService {
         return mapToTransactionResponseDto(transaction);
     }
 
+    @CacheEvict(value = "payPeriodSummaries", allEntries = true)
     public TransactionResponseDto updateTransaction(String email, Long transactionId, UpdateTransactionDto dto) {
         User user = getUserByEmail(email);
 
@@ -106,6 +109,7 @@ public class TransactionService {
         return mapToTransactionResponseDto(transaction);
     }
 
+    @CacheEvict(value = "payPeriodSummaries", allEntries = true)
     public void deleteTransaction(String email, Long transactionId) {
         User user = getUserByEmail(email);
 

@@ -2,10 +2,11 @@ package com.collins.leftover.dto.transaction;
 
 import com.collins.leftover.model.TransactionType;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
-public class TransactionResponseDto {
+public class TransactionResponseDto  implements Serializable {
     private Long id;
     private TransactionType type;
     private BigDecimal amount;

@@ -4,6 +4,7 @@ import com.collins.leftover.dto.payperiod.PayPeriodSummaryResponseDto;
 import com.collins.leftover.dto.transaction.TransactionResponseDto;
 import com.collins.leftover.model.*;
 import com.collins.leftover.repository.*;
+import org.springframework.cache.annotation.Cacheable;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
@@ -72,7 +73,7 @@ public class PayPeriodSummaryService {
         return payPeriodSummaryRepository.save(summary);
     }
 
-   // @Cacheable(value = "payPeriodSummaries", key = "#email + ':' + #payPeriodId")
+    @Cacheable(value = "payPeriodSummaries", key = "#email + ':' + #payPeriodId")
     public PayPeriodSummaryResponseDto getPayPeriodSummary(String email, Long payPeriodId) {
 
         LOGGER.info("Fetching pay period summary from database for payPeriodId: {}", payPeriodId);

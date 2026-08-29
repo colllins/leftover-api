@@ -2,11 +2,12 @@ package com.collins.leftover.dto.payperiod;
 
 import com.collins.leftover.dto.transaction.TransactionResponseDto;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
-public class PayPeriodSummaryResponseDto {
+public class PayPeriodSummaryResponseDto implements Serializable {
     private Long id;
     private LocalDate startDate;
     private LocalDate endDate;

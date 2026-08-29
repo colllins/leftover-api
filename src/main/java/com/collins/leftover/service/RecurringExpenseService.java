@@ -8,6 +8,7 @@ import com.collins.leftover.repository.RecurringExpenseRepository;
 import com.collins.leftover.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -22,6 +23,7 @@ public class RecurringExpenseService {
     private final RecurringExpenseRepository recurringExpenseRepository;
     private final UserRepository userRepository;
 
+    @CacheEvict(value = "payPeriodSummaries", allEntries = true)
     public RecurringExpenseResponseDto createRecurringExpense(String email, CreateRecurringExpenseRequestDto dto) {
         User user = getUserByEmail(email);
 
@@ -60,6 +62,7 @@ public class RecurringExpenseService {
         return mapToRecurringExpenseResponseDto(recurringExpense);
     }
 
+    @CacheEvict(value = "payPeriodSummaries", allEntries = true)
     public void deactivateRecurringExpense(String email, Long expenseId) {
         User user = getUserByEmail(email);
 
@@ -73,6 +76,7 @@ public class RecurringExpenseService {
         recurringExpenseRepository.save(recurringExpense);
     }
 
+    @CacheEvict(value = "payPeriodSummaries", allEntries = true)
     public void deleteRecurringExpense(String email, Long expenseId) {
         User user = getUserByEmail(email);
 

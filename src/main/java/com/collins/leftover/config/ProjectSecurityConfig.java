@@ -16,8 +16,8 @@ public class ProjectSecurityConfig {
     SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http) throws Exception{
         http.csrf(csrfConfig->csrfConfig.disable())
                 .authorizeHttpRequests((requests)->requests
-                        .requestMatchers("/api/users/pay-periods/**", "/api/users/recurring-expenses/**", "/api/users/transactions/**", "/api/users/notifications").authenticated()
-                        .requestMatchers("/api/users/register","/api/users/login", "/api/users/getUser","/api/users/logout", "/error").permitAll()
+                        .requestMatchers("/api/users/pay-periods/**", "/api/users/recurring-expenses/**", "/api/users/transactions/**", "/api/users/notifications", "/api/users/logout").authenticated()
+                        .requestMatchers("/api/users/register","/api/users/login", "/api/users/getUser", "/error").permitAll()
                 );
 //        http.formLogin(flc->flc.loginPage("/api/users/login").usernameParameter("email").passwordParameter("pwd"));
 //        http.logout(loc->loc.logoutSuccessUrl("/api/users/logout")

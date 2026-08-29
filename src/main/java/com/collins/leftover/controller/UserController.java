@@ -5,6 +5,7 @@ import com.collins.leftover.dto.user.AuthResponseDto;
 import com.collins.leftover.dto.user.LoginRequestDto;
 import com.collins.leftover.dto.user.RegisterRequestDto;
 import com.collins.leftover.service.UserService;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
@@ -73,19 +74,9 @@ public class UserController {
         }
     }
 
-    @GetMapping("/logout")
+    @PostMapping("/logout")
     public ResponseEntity<String> logoutUser(HttpServletRequest request,
                                              HttpServletResponse response) {
-//        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-//        SecurityContextHolder.clearContext();
-//                //.getContext().getAuthentication();
-////        if(null!=authentication){
-//            return ResponseEntity.status(HttpStatus.OK).body("User " + authentication.getName()+ " successfully logged out");
-////        }else{
-////            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("user logout failed");        //for testing
-////        }
-
-
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
         HttpSession session = request.getSession(false);
@@ -94,6 +85,12 @@ public class UserController {
         }
 
         SecurityContextHolder.clearContext();
+
+        Cookie cookie = new Cookie("JSESSIONID", null);
+        cookie.setPath("/");
+        cookie.setHttpOnly(true);
+        cookie.setMaxAge(0);
+        response.addCookie(cookie);
 
         String username = authentication != null ? authentication.getName() : "User";
         return ResponseEntity.ok("User " + username + " successfully logged out");
