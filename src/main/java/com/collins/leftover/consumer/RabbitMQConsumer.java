@@ -30,7 +30,7 @@ public class RabbitMQConsumer {
 
         PayPeriod payPeriod = payPeriodRepository.findById(payPeriodClosedEvent.getPayPeriodId()).orElseThrow(() -> new RuntimeException("Pay period not found"));
 
-        if (payPeriodSummaryRepository.existsByPayPeriodId(payPeriod.getId())) {
+        if (payPeriodSummaryRepository.existsByPayPeriod_Id(payPeriod.getId())) {
             LOGGER.info("Summary already exists for pay period {}", payPeriod.getId());
             return;
         }

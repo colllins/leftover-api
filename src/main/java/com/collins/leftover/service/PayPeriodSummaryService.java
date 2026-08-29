@@ -8,8 +8,6 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.cache.annotation.CachePut;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -31,13 +29,13 @@ public class PayPeriodSummaryService {
     private final UserRepository userRepository;
     private final PayPeriodRepository payPeriodRepository;
 
-    @CachePut(value = "payPeriodSummaries", key = "#payPeriod.user.email + ':' + #payPeriod.id")
+   // @CachePut(value = "payPeriodSummaries", key = "#payPeriod.user.email + ':' + #payPeriod.id")
     public PayPeriodSummary createSummary(PayPeriod payPeriod) {
 
         BigDecimal income = payPeriod.getPlannedIncome();
 
         BigDecimal transactionIncome = transactionRepository
-                .findAllByPayPeriodId(payPeriod.getId())
+                .findAllByPayPeriod_Id(payPeriod.getId())
                 .stream()
                 .filter(transaction -> transaction.getType() == TransactionType.INCOME)
                 .map(Transaction::getAmount)
@@ -46,7 +44,7 @@ public class PayPeriodSummaryService {
         income = income.add(transactionIncome);
 
         BigDecimal transactionExpenses = transactionRepository
-                .findAllByPayPeriodId(payPeriod.getId())
+                .findAllByPayPeriod_Id(payPeriod.getId())
                 .stream()
                 .filter(transaction -> transaction.getType() == TransactionType.EXPENSE)
                 .map(Transaction::getAmount)
@@ -74,7 +72,7 @@ public class PayPeriodSummaryService {
         return payPeriodSummaryRepository.save(summary);
     }
 
-    @Cacheable(value = "payPeriodSummaries", key = "#email + ':' + #payPeriodId")
+   // @Cacheable(value = "payPeriodSummaries", key = "#email + ':' + #payPeriodId")
     public PayPeriodSummaryResponseDto getPayPeriodSummary(String email, Long payPeriodId) {
 
         LOGGER.info("Fetching pay period summary from database for payPeriodId: {}", payPeriodId);
@@ -88,7 +86,7 @@ public class PayPeriodSummaryService {
                 ));
 
         PayPeriodSummary summary = payPeriodSummaryRepository
-                .findByPayPeriodIdAndUserEmail(payPeriodId, email)
+                .findByPayPeriod_IdAndUser_Email(payPeriodId, email)
                 .orElseGet(() -> createSummary(payPeriod));
 
         List<TransactionResponseDto> transactions = transactionRepository
