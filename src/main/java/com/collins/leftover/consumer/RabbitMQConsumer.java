@@ -1,10 +1,14 @@
 package com.collins.leftover.consumer;
 
 import com.collins.leftover.event.PayPeriodClosedEvent;
+import com.collins.leftover.model.Notification;
 import com.collins.leftover.model.PayPeriod;
 import com.collins.leftover.model.PayPeriodSummary;
+import com.collins.leftover.model.User;
 import com.collins.leftover.repository.PayPeriodRepository;
 import com.collins.leftover.repository.PayPeriodSummaryRepository;
+import com.collins.leftover.repository.UserRepository;
+import com.collins.leftover.service.EmailService;
 import com.collins.leftover.service.NotificationService;
 import com.collins.leftover.service.PayPeriodSummaryService;
 import lombok.RequiredArgsConstructor;
@@ -22,11 +26,16 @@ public class RabbitMQConsumer {
     private final PayPeriodSummaryService payPeriodSummaryService;
     private final NotificationService notificationService;
     private final PayPeriodSummaryRepository payPeriodSummaryRepository;
+    private final EmailService emailService;
+    private final UserRepository userRepository;
 
     @RabbitListener(queues = {"${pay-period.closed.queue.name}"})
     public void consumeMessage(PayPeriodClosedEvent payPeriodClosedEvent){
 
         LOGGER.info(String.format("Received JSON message -> %s", payPeriodClosedEvent.toString()));
+
+        User user = userRepository.findById(payPeriodClosedEvent.getUserId())
+                .orElseThrow(() -> new RuntimeException("User not found"));
 
         PayPeriod payPeriod = payPeriodRepository.findById(payPeriodClosedEvent.getPayPeriodId()).orElseThrow(() -> new RuntimeException("Pay period not found"));
 
@@ -40,8 +49,9 @@ public class RabbitMQConsumer {
         String title = "Your Pay Period summary is Ready!";
         String message = "Your Pay Period Summary is Ready. You had $"+payPeriodSummary.getLeftOver()+" left over.";
 
-        notificationService.createNotification(payPeriod.getUser(), title, message, false);
+        Notification notification = notificationService.createNotification(payPeriod.getUser(), title, message, false);
 
+        emailService.sendEmail(user.getEmail(),title, message);
 
     }
 

@@ -23,6 +23,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class UserService implements UserDetailsService {
     private final UserRepository userRepository;
+    private final EmailService emailService;
 
     public AuthResponseDto registerUser(RegisterRequestDto requestDto){
 
@@ -35,11 +36,16 @@ public class UserService implements UserDetailsService {
             userRepository.save(user);
 
             //using the newly created user to create a reponseDto for client viewing
+
+           // emailService.sendEmail("lekecollins2@gmail.com","Email from Amazon SES", "testing SES email from Spring Boot");
+
+
             return  new AuthResponseDto(user.getId(), user.getName());
         }else{
             //throwing a specific exception for this situation
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Email already exist! Try Again!");
         }
+
     }
 
     public AuthResponseDto getUserById(Long userId){

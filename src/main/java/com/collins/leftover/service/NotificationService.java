@@ -16,7 +16,7 @@ public class NotificationService {
 
     private final NotificationRepository notificationRepository;
 
-    public void createNotification(User user, String title, String message, boolean isRead){
+    public Notification createNotification(User user, String title, String message, boolean isRead){
 
         Notification notification = new Notification();
         notification.setUser(user);
@@ -25,7 +25,7 @@ public class NotificationService {
         notification.setRead(isRead);
         notification.setCreatedAt(LocalDateTime.now());
 
-        notificationRepository.save(notification);
+       return notificationRepository.save(notification);
     }
 
     public List<Notification> getLatestNotifications(String email) {

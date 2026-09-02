@@ -34,6 +34,8 @@ services:
       - "8080:8080"
     environment:
       DB_PASSWORD: ${DB_PASSWORD}
+      AWS_SES_SMTP_USERNAME: ${AWS_SES_SMTP_USERNAME}
+      AWS_SES_SMTP_PASSWORD: ${AWS_SES_SMTP_PASSWORD}
 
 volumes:
   leftover_mysql_data:
